@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>تشجيع روان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet" />
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #0b0b0b;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            direction: rtl;
+        }
+
+        /* ============================================================
+           LOCK SCREEN
+           ============================================================ */
+        #lockScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, #1a0a16, #0b0b0b 80%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        #lockScreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .lock-box {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 105, 180, 0.25);
+            border-radius: 40px;
+            padding: 45px 40px 50px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(255, 20, 147, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: floatLock 3s ease-in-out infinite;
+        }
+
+        @keyframes floatLock {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .lock-box .lock-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+            display: block;
+            filter: drop-shadow(0 0 20px #ff1493);
+        }
+
+        .lock-box h2 {
+            color: #fff;
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .lock-box p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            margin-bottom: 28px;
+            font-weight: 300;
+        }
+
+        .lock-box .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .lock-box input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 105, 180, 0.2);
+            border-radius: 60px;
+            padding: 16px 24px;
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: 'Tajawal', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .lock-box input:focus {
+            border-color: #ff69b4;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.15);
+        }
+
+        .lock-box input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+            font-weight: 300;
+        }
+
+        .lock-box .btn-unlock {
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            border: none;
+            border-radius: 60px;
+            padding: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            font-family: 'Tajawal', sans-serif;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 25px rgba(255, 20, 147, 0.3);
+        }
+
+        .lock-box .btn-unlock:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 35px rgba(255, 20, 147, 0.5);
+        }
+
+        .lock-box .btn-unlock:active {
+            transform: scale(0.96);
+        }
+
+        .lock-box .error-msg {
+            color: #ff6b81;
+            font-size: 15px;
+            margin-top: 16px;
+            min-height: 28px;
+            font-weight: 400;
+            transition: all 0.3s;
+            opacity: 0;
+        }
+
+        .lock-box .error-msg.show {
+            opacity: 1;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+           ============================================================ */
+        #mainContent {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 20px;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+            background: radial-gradient(ellipse at 20% 30%, #1f0f1a, #0a0a0a 80%);
+        }
+
+        #mainContent.show {
+            opacity: 1;
+        }
+
+        /* حاوية القلوب (خلفية) */
+        #hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            color: #ff69b4;
+            font-size: 22px;
+            opacity: 0.5;
+            animation: fall linear infinite;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+            user-select: none;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-120vh) rotate(0deg) scale(0.6);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* البطاقة الرئيسية */
+        .card {
+            position: relative;
+            z-index: 1;
+            max-width: 780px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 105, 180, 0.15);
+            border-radius: 60px;
+            padding: 50px 45px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(255, 20, 147, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.01);
+        }
+
+        .card .emoji-big {
+            font-size: 72px;
+            display: block;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 30px #ff149366);
+            animation: pulseEmoji 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseEmoji {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .card h1 {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff69b4, #ff1493, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .card .sub {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 18px;
+            animation: fadeInUp 1s ease 0.4s both;
+            text-shadow: 0 2px 20px rgba(255, 20, 147, 0.2);
+        }
+
+        .card .sub span {
+            color: #ff69b4;
+            background: rgba(255, 105, 180, 0.08);
+            padding: 0 12px;
+            border-radius: 40px;
+        }
+
+        .card .desc {
+            font-size: 20px;
+            line-height: 2;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 300;
+            margin-bottom: 25px;
+            animation: fadeInUp 1s ease 0.6s both;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .card .desc .highlight-text {
+            color: #ff69b4;
+            font-weight: 700;
+        }
+
+        .card .highlight {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            padding: 12px 40px;
+            border-radius: 60px;
+            font-size: 40px;
+            font-weight: 900;
+            color: #fff;
+            margin: 15px 0 30px;
+            box-shadow: 0 10px 30px rgba(255, 20, 147, 0.3);
+            animation: fadeInUp 1s ease 0.8s both, glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 10px 30px rgba(255, 20, 147, 0.3); }
+            100% { box-shadow: 0 15px 50px rgba(255, 20, 147, 0.6); }
+        }
+
+        .card .signature {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 300;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 28px;
+            margin-top: 10px;
+            animation: fadeInUp 1s ease 1s both;
+        }
+
+        .card .signature strong {
+            color: #ff69b4;
+            font-weight: 700;
+            font-size: 22px;
+        }
+
+        .card .medical-icon {
+            font-size: 30px;
+            display: inline-block;
+            margin: 0 5px;
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* ============================================================
+           ANIMATIONS (fadeInUp)
+           ============================================================ */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 600px) {
+            .lock-box {
+                padding: 30px 25px 35px;
+                border-radius: 28px;
+            }
+            .lock-box h2 {
+                font-size: 22px;
+            }
+            .lock-box input {
+                font-size: 16px;
+                padding: 14px 18px;
+            }
+            .lock-box .btn-unlock {
+                font-size: 17px;
+                padding: 14px;
+            }
+            .card {
+                padding: 30px 22px;
+                border-radius: 40px;
+            }
+            .card .emoji-big {
+                font-size: 50px;
+            }
+            .card h1 {
+                font-size: 32px;
+            }
+            .card .sub {
+                font-size: 19px;
+            }
+            .card .desc {
+                font-size: 17px;
+                line-height: 1.9;
+            }
+            .card .highlight {
+                font-size: 30px;
+                padding: 10px 30px;
+            }
+            .card .signature {
+                font-size: 17px;
+            }
+            .card .signature strong {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .lock-box {
+                padding: 22px 16px 28px;
+            }
+            .card {
+                padding: 22px 16px;
+            }
+            .card h1 {
+                font-size: 26px;
+            }
+            .card .sub {
+                font-size: 17px;
+            }
+            .card .desc {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ====== شاشة القفل ====== -->
+    <div id="lockScreen">
+        <div class="lock-box">
+            <span class="lock-icon">🔒</span>
+            <h2>مفاجأة سارة</h2>
+            <p>أدخل كلمة السر لرؤية رسالة الدعم</p>
+            <div class="input-group">
+                <input type="text" id="passwordInput" placeholder="كلمة السر" autocomplete="off" />
+                <button class="btn-unlock" id="unlockBtn">✨ افتحي المفاجأة</button>
+            </div>
+            <div class="error-msg" id="errorMsg">🙈 كلمة السر مش صح، جربي تاني</div>
+        </div>
+    </div>
+
+    <!-- ====== المحتوى الرئيسي ====== -->
+    <div id="mainContent">
+        <!-- خلفية القلوب المتساقطة -->
+        <div id="hearts-container"></div>
+
+        <!-- البطاقة -->
+        <div class="card">
+            <span class="emoji-big">🌸</span>
+            <h1>يا دكتورة روان</h1>
+            <div class="sub">
+                <span>ثانوية عامة</span> وإحنا وراكِ
+            </div>
+            <p class="desc">
+                🌟 يعنى إيه ثانوية عامة؟ مجرد مرحلة وهتعدي يا جميلة!<br />
+                أنا عارف إن الضغط تقيل والسترس مش سهل، بس والله إنتِ أقوى من أي امتحان.<br />
+                إنتِ بالنسبالي <span class="highlight-text">الدكتورة روان</span> من دلوقتي،
+                واللي هتقفلي المجموعة وتجيبى <span class="highlight-text">99%</span> بإذن الله،
+                وتفرحينا كلنا.<br />
+                😎 خليكى فاكرة إن المذاكرة مش نهاية الدنيا، وفي الآخر هتشوفى ثمرة تعبكِ.<br />
+                🩺 المختبرات والمرضى مستنيين دكتورتهم، وأنا مستنى أقولك "أنا قولتلك كده" لما تنجحى.<br />
+                <span style="display:inline-block; margin-top:12px; font-size:28px;">💪❤️📚</span>
+            </p>
+            <div class="highlight">💖 99% قادمة 💖</div>
+            <p class="signature">
+                إهداء خاص من: <strong>أحمد خالد</strong>
+                <br />
+                <span style="font-size:14px; opacity:0.5;">🇸🇦</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // --- عناصر الصفحة ---
+            const lockScreen = document.getElementById('lockScreen');
+            const mainContent = document.getElementById('mainContent');
+            const passwordInput = document.getElementById('passwordInput');
+            const unlockBtn = document.getElementById('unlockBtn');
+            const errorMsg = document.getElementById('errorMsg');
+
+            const CORRECT_PASSWORD = 'أحمد'; // كلمة السر
+
+            // --- دالة عرض الخطأ مع اهتزاز ---
+            function showError() {
+                errorMsg.classList.add('show');
+                clearTimeout(window.errorTimeout);
+                window.errorTimeout = setTimeout(function() {
+                    errorMsg.classList.remove('show');
+                }, 2500);
+                passwordInput.style.animation = 'shake 0.4s ease';
+                setTimeout(function() {
+                    passwordInput.style.animation = '';
+                }, 500);
+            }
+
+            // --- دالة فتح الموقع ---
+            function unlockSite() {
+                const entered = passwordInput.value.trim();
+                if (entered === CORRECT_PASSWORD) {
+                    lockScreen.classList.add('hidden');
+                    mainContent.classList.add('show');
+                    startHearts();
+                    passwordInput.value = '';
+                    errorMsg.classList.remove('show');
+                } else {
+                    showError();
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            }
+
+            // --- مستمعي الأحداث ---
+            unlockBtn.addEventListener('click', unlockSite);
+            passwordInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    unlockSite();
+                }
+            });
+
+            window.addEventListener('load', function() {
+                passwordInput.focus();
+            });
+
+            // --- نظام تساقط القلوب ---
+            let heartsInterval = null;
+
+            function startHearts() {
+                if (heartsInterval) return;
+                const container = document.getElementById('hearts-container');
+                heartsInterval = setInterval(function() {
+                    createHeart(container);
+                }, 350);
+
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(function() {
+                        createHeart(container);
+                    }, i * 80);
+                }
+            }
+
+            function createHeart(container) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                const icons = ['❤️', '💖', '💗', '💓', '🌸', '🌺', '💕'];
+                heart.textContent = icons[Math.floor(Math.random() * icons.length)];
+                const size = 16 + Math.random() * 28;
+                heart.style.fontSize = size + 'px';
+                heart.style.left = Math.random() * 100 + '%';
+                const duration = 8 + Math.random() * 12;
+                heart.style.animationDuration = duration + 's';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.opacity = 0.3 + Math.random() * 0.5;
+
+                container.appendChild(heart);
+
+                const removeHeart = function() {
+                    if (heart.parentNode) {
+                        heart.parentNode.removeChild(heart);
+                    }
+                };
+                heart.addEventListener('animationend', removeHeart);
+                setTimeout(removeHeart, (duration + 5) * 1000);
+            }
+
+            // --- مراقبة إخفاء القفل لبدء القلوب (احتياطي) ---
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        if (lockScreen.classList.contains('hidden')) {
+                            if (!heartsInterval) {
+                                startHearts();
+                            }
+                        }
+                    }
+                });
+            });
+            observer.observe(lockScreen, { attributes: true });
+        })();
+    </script>
+</body>
+</html>
